@@ -19,7 +19,7 @@ use Carp;
 use strict;
 use vars qw($VERSION %MESSAGES $AUTOLOAD);
 
-$VERSION = '3.02';
+$VERSION = '3.0201';
 
 use CGI::FormBuilder::Util;
 
@@ -87,6 +87,7 @@ sub new {
     my %hash  = %MESSAGES;
 
     return bless \%hash, $class unless $src;
+    debug 2, "creating Messages object from $src";
 
     if (my $ref = ref $src) {
         # hashref, get values directly
@@ -131,7 +132,7 @@ sub message {
     belch "No message string found for '$key'" unless exists $self->{$key};
     if (ref $self->{$key} eq 'ARRAY') {
         # hack catch for external file
-        $self->{$key} = join ', ', @{$self->{$key}};
+        $self->{$key} = "@{$self->{$key}}";
     }
     return $self->{$key} || '';
 }

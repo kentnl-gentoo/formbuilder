@@ -42,7 +42,7 @@ use Carp;
 use strict;
 use vars qw($VERSION @TAGATTR %VALIDATE $AUTOLOAD);
 
-$VERSION = '3.02';
+$VERSION = '3.0201';
 
 use CGI::FormBuilder::Util;
 
@@ -796,15 +796,17 @@ sub tag {
             # if have options, lookup the label instead of the true value
             for (@opt) {
                 my($o,$n) = optval($_);
-                $n ||= $attr{labels}{$o} || ($self->nameopts ? toname($o) : $o);
-                $value = $n, last if $n;
+                if ($o eq $value) {
+                    $n ||= $attr{labels}{$o} || ($self->nameopts ? toname($o) : $o);
+                    $value = $n;
+                    last;
+                }
             }
 
             # print the value out too when in a static context, EXCEPT for
             # manually hidden fields (those that the user hid themselves)
             my $tagcom = escapehtml($value);
             $tag .= $tagcom . ' ' if $self->static && $tagcom && $usertype ne 'hidden';
-            debug 2, "if ", $self->static, " && $tagcom && $usertype ne 'hidden';";
 
             if ($self->growable && $self->javascript) {
                 # put linebreaks between the input tags in growable fields

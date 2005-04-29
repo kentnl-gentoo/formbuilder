@@ -58,7 +58,7 @@ use CGI::FormBuilder::Util;
 use CGI::FormBuilder::Field;
 use CGI::FormBuilder::Messages;
 
-$VERSION = '3.02';
+$VERSION = '3.0201';
 
 # Default options for FormBuilder
 %DEFAULT = (
@@ -207,13 +207,14 @@ sub new {
         $self->{params} = CGI->new($self->{params});
     }
 
-    # And a messages delegate if not existent
-    unless ($self->{messages} && ref $self->{messages} ne 'HASH') {
-        $self->{messages} = CGI::FormBuilder::Messages->new($self->{messages});
-    }
-
     # XXX not mod_perl safe (problem)
     $CGI::FormBuilder::Util::DEBUG = $self->{debug};
+
+    # And a messages delegate if not existent
+    my $snm = ref $self->{messages};
+    unless ($snm && $snm ne 'HASH') {
+        $self->{messages} = CGI::FormBuilder::Messages->new($self->{messages});
+    }
 
     # Initialize form fields (probably a good idea)
     if ($self->{fields}) {
@@ -352,7 +353,13 @@ sub field {
 
     # have name, so redispatch to field member
     debug 2, "searching fields for '$args{name}'";
-    if (my $f = $self->{fieldrefs}{$args{name}}) {
+    if ($args{delete}) {
+        # blow the thing away
+        delete $self->{fieldrefs}{$args{name}};
+        my @tf = grep { $_->name ne $args{name} } @{$self->{fields}};
+        $self->{fields} = \@tf;
+        return;
+    } elsif (my $f = $self->{fieldrefs}{$args{name}}) {
         delete $args{name};         # segfault??
         return $f->field(%args);    # set args, get value back
     }
@@ -980,6 +987,11 @@ sub values {
         }
     }
 
+}
+
+sub name {
+    my $self = shift;
+    @_ ? $self->{name} = shift : $self->{name};
 }
 
 sub nameopts {
