@@ -58,7 +58,7 @@ use CGI::FormBuilder::Util;
 use CGI::FormBuilder::Field;
 use CGI::FormBuilder::Messages;
 
-$VERSION = '3.0201';
+$VERSION = '3.0202';
 
 # Default options for FormBuilder
 %DEFAULT = (
@@ -472,7 +472,7 @@ sub start {
 
     $attr{action} ||= $self->action;
     $attr{method} ||= $self->method;
-    $attr{disabled} = 'disabled' if $self->disabled;
+    $self->disabled ? $attr{disabled} = 'disabled' : delete $attr{disabled};
     $attr{class}  ||= $self->{styleclass} . 'form' if $self->{stylesheet};
 
     # Bleech, there's no better way to do this...?
@@ -489,7 +489,8 @@ sub end {
 # Need to wrap this or else AUTOLOAD whines (OURATTR missing)
 sub disabled {
     my $self = shift;
-    @_ ? $self->{disabled} = shift : $self->{disabled};
+    $self->{disabled} = shift if @_;
+    return $self->{disabled} ? 'disabled' : undef;
 }
  
 # These return attr in wantarray (unusual) since it helps in render()
@@ -1236,7 +1237,7 @@ sub render {
                 }
                 $html .= $fcls . '</td>' . $self->td(id => $inid) . $font;
                 $html .= $field->tag;
-                $html .= ' ' . $field->comment if $field->comment;  # "if" to control ' '
+                $html .= ' ' . $field->comment if $field->comment && ! $field->static;
                 $html .= $fcls . '</td>';
                 $html .= $self->td(id => $erid) . $font . $field->message . $fcls . '</td>'
                       if $field->invalid;

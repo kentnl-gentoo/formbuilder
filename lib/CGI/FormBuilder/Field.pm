@@ -42,7 +42,7 @@ use Carp;
 use strict;
 use vars qw($VERSION @TAGATTR %VALIDATE $AUTOLOAD);
 
-$VERSION = '3.0201';
+$VERSION = '3.0202';
 
 use CGI::FormBuilder::Util;
 
@@ -635,7 +635,7 @@ sub tag {
     delete $attr{value};     # useless in all tags
 
     # Disable field/form
-    $attr{disabled} = 'disabled' if $self->disabled;
+    $self->disabled ? $attr{disabled} = 'disabled' : delete $attr{disabled};
 
     # Setup class for stylesheets and JS vars
     $attr{class} ||= $self->{_form}{styleclass} . $type if $self->{_form}{stylesheet};
@@ -971,9 +971,10 @@ sub static () {
 sub disabled () {
     my $self = shift;
     $self->{disabled} = shift if @_;
-    return $self->{disabled} if exists $self->{disabled};
+    return ($self->{disabled} ? 'disabled' : undef)
+        if exists $self->{disabled};
     # check parent for this as well
-    return $self->{_form}{disabled};
+    return $self->{_form}->disabled;
 }
 
 sub javascript () {
