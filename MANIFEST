@@ -170,3 +170,5 @@ t/3a-test27.html
 t/3a-test28.html
 t/3b-multi-page.t
 t/3b-test22.html
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
